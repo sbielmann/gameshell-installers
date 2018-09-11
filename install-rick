@@ -1,0 +1,26 @@
+if [ ! -d /tmp/xrick-libretro ]
+then
+  echo "Downloading Rick Dangerous core source..."
+  git clone https://github.com/libretro/xrick-libretro.git /tmp/xrick-libretro
+fi
+cd /tmp/xrick-libretro
+echo "Compiling Rick Dangerous core, takes about 1 minute..."
+make >/dev/null 2>&1
+chmod -x xrick_libretro.so
+cp xrick_libretro.so /home/cpi/apps/emulators/
+mkdir -p /home/cpi/games/xrick
+cp data.zip /home/cpi/games/xrick
+echo "retroarch -L /home/cpi/apps/emulators/xrick_libretro.so /home/cpi/games/xrick/data.zip" > /home/cpi/apps/launcher/Menu/GameShell/RickDangerous.sh
+chmod +x /home/cpi/apps/launcher/Menu/GameShell/RickDangerous.sh
+echo "Downloading icon from Gameshell Forum..."
+wget -O /home/cpi/apps/launcher/skin/default/Menu/GameShell/RickDangerous.png https://discourse-cdn-sjc2.com/standard17/uploads/clockworkpi/original/2X/f/feca9ab31a76a2cbabcf85dfb3f665dd436438ab.png >/dev/null 2>&1
+cd -
+echo ""
+echo "============================================"
+echo ""
+echo "         Rick Dangerous installed"
+echo ""
+echo "         Start RetroArch and quit it"
+echo "         again to reset menu contents"
+echo "         or reboot your Gameshell"
+echo ""
