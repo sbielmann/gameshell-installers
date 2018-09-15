@@ -1,26 +1,198 @@
-if [ ! -d /tmp/xrick-libretro ]
+#
+# Rick Dangerous Libretro installer and updater for GameShell
+#
+
+#
+# variables
+#
+XR_BIN_FILE=/home/cpi/apps/emulators/xrick_libretro.so
+XR_GIT_SOURCE=https://github.com/libretro/xrick-libretro.git
+XR_CLONE_DIR=/tmp/xrick-libretro
+XR_DATA_DIR=/home/cpi/games/xrick
+XR_NAME=RickDangerous
+XR_MENU_BASE=/home/cpi/apps/launcher/Menu/GameShell
+XR_MENU_RETRO="20_Retro Games"
+XR_MENU_APPS=Apps
+XR_MENU_ICON_BASE=/home/cpi/apps/launcher/skin/default/Menu/GameShell
+XR_ICON_1=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/xrick_bw1.png
+XR_ICON_2=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/xrick_bw2.png
+XR_ICON_3=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/xrick_col1.png
+XR_ICON_APP=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/apps.png
+
+#
+# print some welcome text, check whether we install for the first time
+# or for an update, and let user choose menu item location and icon
+#
+echo ""
+echo "=================================================="
+echo "           Rick Dangerous installer"
+echo "=================================================="
+echo ""
+echo "Press Control and C keys anytime to interrupt the installation"
+echo ""
+echo "GameShell needs to be connected to the internet, it will"
+echo "download the core source and icons during installation"
+echo ""
+
+XR_DO_UPDATE=0
+XR_MENU_CHOICE="0"
+XR_ICON_CHOICE="0"
+
+if [ -f ${XR_BIN_FILE} ]
 then
-  echo "Downloading Rick Dangerous core source..."
-  git clone https://github.com/libretro/xrick-libretro.git /tmp/xrick-libretro
+    XR_DO_UPDATE=1
+    echo "Game is already installed, will update it"
+else
+    while [ "${XR_MENU_CHOICE}" != "a" ] && [ "${XR_MENU_CHOICE}" != "b" ] && [ "${XR_MENU_CHOICE}" != "c" ]
+    do
+        echo ""
+        echo "Where would you like to put the game menu item?"
+        echo "  a - Top Level"
+        echo "  b - Apps"
+        echo "  c - Retro Games"
+        echo "Apps will be created if not yet existing, with icon from Micro007."
+        echo -n "Your choice (a,b,c): "
+        read XR_MENU_CHOICE
+    done
+
+    while [ "${XR_ICON_CHOICE}" != "a" ] && [ "${XR_ICON_CHOICE}" != "b" ] && [ "${XR_ICON_CHOICE}" != "c" ]
+    do
+        echo ""
+        echo "Which icon for the game would you like to install?"
+        echo "  a - Default black & white"
+        echo "  b - Aluqard black & white"
+        echo "  c - Aluqard color"
+        echo -n "Your choice (a,b,c): "
+        read XR_ICON_CHOICE
+    done
+    echo ""
 fi
-cd /tmp/xrick-libretro
-echo "Compiling Rick Dangerous core, takes about 1 minute..."
+
+#
+# helper function to print out different texts for installation or update
+# Arguments:
+#   - Text to print when installing
+#   - Text to print when updating
+#
+function printInstallOrUpdate() {
+    if [ ${XR_DO_UPDATE} -eq 0 ]
+    then
+        echo $1
+    else
+        echo $2
+    fi
+}
+
+#
+# download game data and source, if not already, compile if not already
+# install it or update existing installation
+#
+if [ ! -d ${XR_CLONE_DIR} ]
+then
+    echo "Downloading game core source..."
+    git clone ${XR_GIT_SOURCE} ${XR_CLONE_DIR} >/dev/null 2>&1
+else
+    echo "Game core source already downloaded"
+fi
+
+cd ${XR_CLONE_DIR} >/dev/null 2>&1
+echo "Compiling game core, takes about 1 minute..."
 make >/dev/null 2>&1
 chmod -x xrick_libretro.so
-cp xrick_libretro.so /home/cpi/apps/emulators/
-mkdir -p /home/cpi/games/xrick
-cp data.zip /home/cpi/games/xrick
-echo "retroarch -L /home/cpi/apps/emulators/xrick_libretro.so /home/cpi/games/xrick/data.zip" > /home/cpi/apps/launcher/Menu/GameShell/RickDangerous.sh
-chmod +x /home/cpi/apps/launcher/Menu/GameShell/RickDangerous.sh
-echo "Downloading icon from Gameshell Forum..."
-wget -O /home/cpi/apps/launcher/skin/default/Menu/GameShell/RickDangerous.png https://discourse-cdn-sjc2.com/standard17/uploads/clockworkpi/original/2X/f/feca9ab31a76a2cbabcf85dfb3f665dd436438ab.png >/dev/null 2>&1
-cd -
+
+printInstallOrUpdate "Installing game core" "Updating game core"
+cp xrick_libretro.so ${XR_BIN_FILE}
+
+printInstallOrUpdate "Installing game data file" "Updating game data file"
+mkdir -p ${XR_DATA_DIR}
+cp data.zip ${XR_DATA_DIR}
+
+#
+# create launcher menu with icon, however only when installing
+#
+XR_APP_ICON_IMAGE=""
+if [ ${XR_DO_UPDATE} -eq 0 ]
+then
+    echo "Configuring menu item..."
+    case ${XR_MENU_CHOICE} in
+        "b")
+            XR_MENU=${XR_MENU_BASE}/${XR_MENU_APPS}
+            XR_MENU_ICON=${XR_MENU_ICON_BASE}/${XR_MENU_APPS}
+            # special case, we also have to ensure that
+            # apps is existing
+            if [ ! -d ${XR_MENU} ]
+            then
+                echo "Apps menu not found, will create it..."
+                mkdir -p ${XR_MENU}
+                mkdir -p ${XR_MENU_ICON}
+                echo "Downloading and installing Apps icon..."
+                XR_APP_ICON_IMAGE=${XR_MENU_ICON_BASE}/${XR_MENU_APPS}.png
+                wget -O ${XR_APP_ICON_IMAGE} ${XR_ICON_APP} >/dev/null 2>&1
+            fi
+        ;;
+        "c")
+            XR_MENU="${XR_MENU_BASE}/${XR_MENU_RETRO}"
+            XR_MENU_ICON="${XR_MENU_ICON_BASE}/${XR_MENU_RETRO}"
+        ;;
+        *)
+            XR_MENU=${XR_MENU_BASE}
+            XR_MENU_ICON=${XR_MENU_ICON_BASE}
+        ;;
+    esac
+    XR_MENU_ITEM="${XR_MENU}/${XR_NAME}.sh"
+    XR_MENU_ICON_IMAGE="${XR_MENU_ICON}/${XR_NAME}.png"
+    echo "retroarch -L ${XR_BIN_FILE} ${XR_DATA_DIR}/data.zip" > "${XR_MENU_ITEM}"
+    chmod +x "${XR_MENU_ITEM}"
+
+    echo "Downloading and installing menu icon..."
+    case ${XR_ICON_CHOICE} in
+        "b")
+            XR_ICON=${XR_ICON_2}
+        ;;
+        "c")
+            XR_ICON=${XR_ICON_3}
+        ;;
+        *)
+            XR_ICON=${XR_ICON_1}
+        ;;
+    esac
+    wget -O "${XR_MENU_ICON_IMAGE}" ${XR_ICON} >/dev/null 2>&1
+fi
+
+#
+# head back to start directory and tell user that script
+# is completed, either installing or updating
+#
+cd - >/dev/null 2>&1
 echo ""
-echo "============================================"
+echo "=================================================="
 echo ""
-echo "         Rick Dangerous installed"
-echo ""
-echo "         Start RetroArch and quit it"
-echo "         again to reset menu contents"
-echo "         or reboot your Gameshell"
+if [ ${XR_DO_UPDATE} -eq 0 ]
+then
+    echo "         Rick Dangerous installed"
+    echo ""
+    echo "Installed files:"
+    echo "  ${XR_BIN_FILE}"
+    echo "  ${XR_DATA_DIR}/data.zip"
+    echo "  ${XR_MENU_ITEM}"
+    echo "  ${XR_MENU_ICON_IMAGE}"
+    if [ "XX${XR_APP_ICON_IMAGE}" != "XX" ]
+    then
+        echo "  ${XR_APP_ICON_IMAGE}"
+    fi
+    echo ""
+    echo ""
+    echo "         Please start RetroArch and quit"
+    echo "         it again to reset menu contents"
+    echo "         or reboot your Gameshell"
+else
+    echo "         Rick Dangerous updated"
+    echo ""
+    echo "Updated files:"
+    echo "  ${XR_BIN_FILE}"
+    echo "  ${XR_DATA_DIR}/data.zip"
+    echo ""
+    echo ""
+    echo "         Game is ready to play"
+fi
 echo ""
