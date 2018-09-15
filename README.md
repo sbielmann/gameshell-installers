@@ -36,6 +36,9 @@ one from Aluqard:
 
 ![alt text](icons/xrick_col1.png "Rick Dangerous Aluqard color icon")
 
+The installer will explain all steps it is performing, and print out
+a list of all installed files at the end.
+
 Should there be an update of the core source in the future, simply
 start the installer again, it will then download the new core source
 and update your installation.
