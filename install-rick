@@ -91,6 +91,14 @@ if [ ! -d ${XR_CLONE_DIR} ]
 then
     echo "Downloading game core source..."
     git clone ${XR_GIT_SOURCE} ${XR_CLONE_DIR} >/dev/null 2>&1
+    if [ $? -ne 0 ]
+    then
+      echo ""
+      echo "ERROR: Unable to download game cour source, please check internet connection"
+      echo ""
+      cd - >/dev/null 2>&1
+      return 1
+    fi
 else
     echo "Game core source already downloaded"
 fi
