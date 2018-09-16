@@ -20,7 +20,7 @@ game source and data files, and icons during installation.
 
 ![alt text](icons/xrick_bw1.png "Rick Dangerous")
 
-Installs the [official Libretro port of Rick Dangerous](https://github.com/libretro/xrick-libretro.git)
+Installs the official Libretro port of [Rick Dangerous](https://github.com/libretro/xrick-libretro.git)
 
 Start the installer on GameShell, you may choose where to put the
 game icon in the menu, either in top level, Apps or Retro Games.
@@ -49,7 +49,7 @@ and update your installation.
 
 ![alt text](https://github.com/pleft/SDLPoP/raw/master/Prince.png "Prince of Persia")
 
-[Installs the GameShell port of Prince of Persia](https://github.com/pleft/SDLPoP)
+Installs the GameShell port of [Prince of Persia](https://github.com/pleft/SDLPoP)
 
 Start the installer on GameShell, you may choose where to put the
 game icon in the menu, either in top level, Apps or Retro Games.
