@@ -1,0 +1,184 @@
+#
+# Prince of Persia Libretro installer and updater for GameShell
+#
+
+#
+# variables
+#
+POP_GAME_DIR=/home/cpi/games/SDLPoP
+POP_GIT_SOURCE=https://github.com/pleft/SDLPoP.git
+POP_CLONE_DIR=/tmp/SDLPoP
+POP_NAME=PrinceOfPersia
+POP_MENU_BASE=/home/cpi/apps/launcher/Menu/GameShell
+POP_MENU_RETRO="20_Retro Games"
+POP_MENU_APPS=Apps
+POP_MENU_ICON_BASE=/home/cpi/apps/launcher/skin/default/Menu/GameShell
+POP_ICON_APP=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/apps.png
+
+#
+# print some welcome text, check whether we install for the first time
+# or for an update, and let user choose menu item location and icon
+#
+echo ""
+echo "=================================================="
+echo "           Prince of Persia installer"
+echo "=================================================="
+echo ""
+echo "Press Control and C keys anytime to interrupt the installation"
+echo ""
+echo "GameShell needs to be connected to the internet, it will"
+echo "download the game source and icons during installation"
+echo ""
+
+POP_DO_UPDATE=0
+POP_MENU_CHOICE="0"
+POP_BIN_FILE=${POP_GAME_DIR}/prince
+
+if [ -f ${POP_BIN_FILE} ]
+then
+    POP_DO_UPDATE=1
+    echo "Game is already installed, will update it"
+else
+    while [ "${POP_MENU_CHOICE}" != "a" ] && [ "${POP_MENU_CHOICE}" != "b" ] && [ "${POP_MENU_CHOICE}" != "c" ]
+    do
+        echo ""
+        echo "Where would you like to put the game menu item?"
+        echo "  a - Top Level"
+        echo "  b - Apps"
+        echo "  c - Retro Games"
+        echo "Apps will be created if not yet existing, with icon from Micro007."
+        echo -n "Your choice (a,b,c): "
+        read POP_MENU_CHOICE
+    done
+
+    echo ""
+fi
+
+#
+# helper function to print out different texts for installation or update
+# Arguments:
+#   - Text to print when installing
+#   - Text to print when updating
+#
+function printInstallOrUpdate() {
+    if [ ${POP_DO_UPDATE} -eq 0 ]
+    then
+        echo $1
+    else
+        echo $2
+    fi
+}
+
+#
+# download game source, if not already, compile if not already
+# install it or update existing installation
+#
+if [ ! -d ${POP_CLONE_DIR} ]
+then
+    echo "Downloading game source..."
+    git clone ${POP_GIT_SOURCE} ${POP_CLONE_DIR} >/dev/null 2>&1
+    if [ $? -ne 0 ]
+    then
+      echo ""
+      echo "ERROR: Unable to download game source, please check internet connection"
+      echo ""
+      cd - >/dev/null 2>&1
+      return 1
+    fi
+else
+    echo "Game source already downloaded"
+fi
+
+cd ${POP_CLONE_DIR} >/dev/null 2>&1
+echo "Compiling game, takes about 90 seconds..."
+(cd src; make) >/dev/null 2>&1
+
+printInstallOrUpdate "Installing game" "Updating game"
+mkdir -p ${POP_GAME_DIR}
+cp prince ${POP_BIN_FILE}
+# won't update INI file, maybe user already customised it
+cp -r data ${POP_GAME_DIR}
+if [ ${POP_DO_UPDATE} -eq 0 ]
+then
+    cp SDLPoP.ini ${POP_GAME_DIR}
+fi
+
+#
+# create launcher menu with icon, however only when installing
+#
+POP_APP_ICON_IMAGE=""
+if [ ${POP_DO_UPDATE} -eq 0 ]
+then
+    echo "Configuring menu item..."
+    case ${POP_MENU_CHOICE} in
+        "b")
+            POP_MENU=${POP_MENU_BASE}/${POP_MENU_APPS}
+            POP_MENU_ICON=${POP_MENU_ICON_BASE}/${POP_MENU_APPS}
+            # special case, we also have to ensure that
+            # apps is existing
+            if [ ! -d ${POP_MENU} ]
+            then
+                echo "Apps menu not found, will create it..."
+                mkdir -p ${POP_MENU}
+                mkdir -p ${POP_MENU_ICON}
+                echo "Downloading and installing Apps icon..."
+                POP_APP_ICON_IMAGE=${POP_MENU_ICON_BASE}/${POP_MENU_APPS}.png
+                wget -O ${POP_APP_ICON_IMAGE} ${POP_ICON_APP} >/dev/null 2>&1
+            fi
+        ;;
+        "c")
+            POP_MENU="${POP_MENU_BASE}/${POP_MENU_RETRO}"
+            POP_MENU_ICON="${POP_MENU_ICON_BASE}/${POP_MENU_RETRO}"
+        ;;
+        *)
+            POP_MENU=${POP_MENU_BASE}
+            POP_MENU_ICON=${POP_MENU_ICON_BASE}
+        ;;
+    esac
+    POP_MENU_ITEM="${POP_MENU}/${POP_NAME}.sh"
+    POP_MENU_ICON_IMAGE="${POP_MENU_ICON}/${POP_NAME}.png"
+    echo "${POP_BIN_FILE} full" > "${POP_MENU_ITEM}"
+    chmod +x "${POP_MENU_ITEM}"
+
+    echo "Installing menu icon..."
+    cp Prince.png "${POP_MENU_ICON_IMAGE}"
+fi
+
+#
+# head back to start directory and tell user that script
+# is completed, either installing or updating
+#
+cd - >/dev/null 2>&1
+echo ""
+echo "=================================================="
+echo ""
+if [ ${POP_DO_UPDATE} -eq 0 ]
+then
+    echo "         Prince Of Persia installed"
+    echo ""
+    echo "Installed files:"
+    echo "  ${POP_BIN_FILE}"
+    echo "  ${POP_GAME_DIR}/SDLPoP.ini"
+    echo "  ${POP_GAME_DIR}/data/"
+    echo "  ${POP_MENU_ITEM}"
+    echo "  ${POP_MENU_ICON_IMAGE}"
+    if [ "XX${POP_APP_ICON_IMAGE}" != "XX" ]
+    then
+        echo "  ${POP_APP_ICON_IMAGE}"
+    fi
+    echo ""
+    echo ""
+    echo "         Please start RetroArch and quit"
+    echo "         it again to reset menu contents"
+    echo "         or reboot your Gameshell"
+else
+    echo "         Prince Of Persia updated"
+    echo ""
+    echo "Updated files:"
+    echo "  ${POP_BIN_FILE}"
+    echo "  ${POP_GAME_DIR}/data/"
+    echo ""
+    echo ""
+    echo "         Game is ready to play"
+fi
+echo ""
