@@ -9,10 +9,10 @@ POP_GAME_DIR=/home/cpi/games/SDLPoP
 POP_GIT_SOURCE=https://github.com/pleft/SDLPoP.git
 POP_CLONE_DIR=/tmp/SDLPoP
 POP_NAME=PrinceOfPersia
-POP_MENU_BASE=/home/cpi/apps/launcher/Menu/GameShell
+POP_MENU_BASE=/home/cpi/launcher/Menu/GameShell
 POP_MENU_RETRO="20_Retro Games"
 POP_MENU_APPS=Apps
-POP_MENU_ICON_BASE=/home/cpi/apps/launcher/skin/default/Menu/GameShell
+POP_MENU_ICON_BASE=/home/cpi/launcher/skin/default/Menu/GameShell
 POP_ICON_APP=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/apps.png
 
 #
