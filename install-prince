@@ -9,11 +9,28 @@ POP_GAME_DIR=/home/cpi/games/SDLPoP
 POP_GIT_SOURCE=https://github.com/pleft/SDLPoP.git
 POP_CLONE_DIR=/tmp/SDLPoP
 POP_NAME=PrinceOfPersia
-POP_MENU_BASE=/home/cpi/launcher/Menu/GameShell
+POP_LAUNCHER_DIR_1=/home/cpi/apps/launcher
+POP_LAUNCHER_DIR_2=/home/cpi/launcher
+POP_MENU=Menu/GameShell
 POP_MENU_RETRO="20_Retro Games"
 POP_MENU_APPS=Apps
-POP_MENU_ICON_BASE=/home/cpi/launcher/skin/default/Menu/GameShell
+POP_MENU_ICON=skin/default/Menu/GameShell
 POP_ICON_APP=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/apps.png
+
+#
+# set launcher paths, either old OS 0.1 or new style OS 0.2 and more recent
+#
+if [ -d ${POP_LAUNCHER_DIR_1} ]
+then
+  POP_MENU_BASE=${POP_LAUNCHER_DIR_1}/${POP_MENU}
+  POP_MENU_ICON_BASE=${POP_LAUNCHER_DIR_1}/${POP_MENU_ICON}
+else
+  if [ -d ${POP_LAUNCHER_DIR_2} ]
+  then
+    POP_MENU_BASE=${POP_LAUNCHER_DIR_2}/${POP_MENU}
+    POP_MENU_ICON_BASE=${POP_LAUNCHER_DIR_2}/${POP_MENU_ICON}
+  fi
+fi
 
 #
 # print some welcome text, check whether we install for the first time

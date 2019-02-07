@@ -10,14 +10,31 @@ XR_GIT_SOURCE=https://github.com/libretro/xrick-libretro.git
 XR_CLONE_DIR=/tmp/xrick-libretro
 XR_DATA_DIR=/home/cpi/games/xrick
 XR_NAME=RickDangerous
-XR_MENU_BASE=/home/cpi/launcher/Menu/GameShell
+XR_LAUNCHER_DIR_1=/home/cpi/apps/launcher
+XR_LAUNCHER_DIR_2=/home/cpi/launcher
+XR_MENU=Menu/GameShell
 XR_MENU_RETRO="20_Retro Games"
 XR_MENU_APPS=Apps
-XR_MENU_ICON_BASE=/home/cpi/launcher/skin/default/Menu/GameShell
+XR_MENU_ICON=skin/default/Menu/GameShell
 XR_ICON_1=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/xrick_bw1.png
 XR_ICON_2=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/xrick_bw2.png
 XR_ICON_3=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/xrick_col1.png
 XR_ICON_APP=https://raw.githubusercontent.com/sbielmann/gameshell-installers/master/icons/apps.png
+
+#
+# set launcher paths, either old OS 0.1 or new style OS 0.2 and more recent
+#
+if [ -d ${XR_LAUNCHER_DIR_1} ]
+then
+  XR_MENU_BASE=${XR_LAUNCHER_DIR_1}/${XR_MENU}
+  XR_MENU_ICON_BASE=${XR_LAUNCHER_DIR_1}/${XR_MENU_ICON}
+else
+  if [ -d ${XR_LAUNCHER_DIR_2} ]
+  then
+    XR_MENU_BASE=${XR_LAUNCHER_DIR_2}/${XR_MENU}
+    XR_MENU_ICON_BASE=${XR_LAUNCHER_DIR_2}/${XR_MENU_ICON}
+  fi
+fi
 
 #
 # print some welcome text, check whether we install for the first time
